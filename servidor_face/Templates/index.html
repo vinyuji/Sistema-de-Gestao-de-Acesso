@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reconhecimento Facial</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 30px;
+    }
+    img {
+      border: 2px solid #000;
+      margin-top: 10px;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Capturar rosto</h1>
+  <form method="POST" action="/capture">
+    <input type="text" name="name" placeholder="Nome da pessoa" required>
+    <button type="submit">Capturar</button>
+  </form>
+
+  <h2>Visualização da Câmera (ao vivo)</h2>
+  <img src="http://192.168.0.140:81/stream" width="320" height="240" alt="Stream ao vivo">
+
+  <h2>Verificar rosto ao vivo</h2>
+  <button onclick="checkFace()">Verificar</button>
+
+  <p id="status"></p>
+  <img id="recognized-photo" src="" alt="" style="display: none; margin-top: 10px; border: 2px solid #555;" width="200">
+
+
+<script>
+  async function checkFace() {
+    try {
+      const res = await fetch('/check');
+      const data = await res.json();
+      const statusElement = document.getElementById('status');
+      const photoElement = document.getElementById('recognized-photo');
+
+      if (data.status === 'recognized') {
+        statusElement.innerText = `✅ Rosto reconhecido: ${data.name}`;
+        statusElement.style.color = 'green';
+        photoElement.src = `/uploads/${data.name}.jpg`;
+        photoElement.style.display = 'inline';
+      } else {
+        statusElement.innerText = '❌ Rosto não reconhecido';
+        statusElement.style.color = 'red';
+        photoElement.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('Erro ao verificar rosto:', err);
+      document.getElementById('status').innerText = 'Erro ao verificar rosto.';
+      document.getElementById('status').style.color = 'orange';
+      document.getElementById('recognized-photo').style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>

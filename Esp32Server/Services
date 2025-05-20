@@ -1,0 +1,42 @@
+#include <WiFi.h>
+#include <WebServer.h>
+
+const char* ssid = "Nome Do Wifi";
+const char* password = "Senha";
+
+WebServer server(80);
+#define RELE_PIN 5  // GPIO 5 = D5
+
+void handleOpen() {
+  digitalWrite(RELE_PIN, HIGH);
+  delay(5000);
+  digitalWrite(RELE_PIN, LOW);
+  
+  server.send(200, "text/plain", "Rele/LED ativado por 5 segundos");
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
+  pinMode(RELE_PIN, OUTPUT);
+  digitalWrite(RELE_PIN, LOW);
+
+  // Espera conexão com Wi-Fi
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWiFi conectado!");
+  Serial.print("Endereço IP: ");
+  Serial.println(WiFi.localIP());
+
+  // Rota HTTP
+  server.on("/open", handleOpen);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+}
